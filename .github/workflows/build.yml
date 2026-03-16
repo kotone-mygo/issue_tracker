@@ -36,7 +36,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.0-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
       # 安装 Rust (使用 actions-rs/toolchain 已废弃，推荐使用 dtolnay/rust-toolchain)
       - name: Setup Rust
@@ -70,6 +70,18 @@ jobs:
       # 构建应用
       - name: Build app
         run: npm run tauri build
+
+      - name: List generated files (Linux/macOS)
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: |
+          echo "Listing contents of src-tauri/target/release/bundle/"
+          ls -R src-tauri/target/release/bundle/
+
+      - name: List generated files (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Get-ChildItem -Path src-tauri\target\release\bundle\ -Recurse
+        shell: pwsh
 
       # 上传构建产物
       - name: Upload artifacts
