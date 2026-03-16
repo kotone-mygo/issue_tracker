@@ -15,6 +15,7 @@ A cross-platform desktop application for tracking issues, built with Tauri (Rust
 - Import and Export issues (JSON format)
 - Back to top button
 - Keyboard shortcut (`/` to focus search)
+- Issues sorted by newest first
 
 ## Tech Stack
 
@@ -27,6 +28,8 @@ A cross-platform desktop application for tracking issues, built with Tauri (Rust
 ### Prerequisites
 
 - **Linux**: `pkg-config`, `libglib2.0-dev`, `libgtk-3-dev`, `libwebkit2gtk-4.1-dev`
+- **macOS**: Xcode Command Line Tools
+- **Windows**: Visual Studio Build Tools
 
 ### Install Dependencies
 
@@ -72,12 +75,14 @@ Issues are stored in JSON format at:
 - Click **☰** menu button to access Import/Export options
 - Use search bar to find issues by title or description
 - Filter issues by status or tags
+- Click **×** in search bar to clear search
 
 ### Issue Detail Page
 
 - View full issue details with rendered Markdown
 - Edit issue (title, description, status, tags)
 - Delete issue (with confirmation)
+- Status can only be changed in detail page
 
 ## Keyboard Shortcuts
 
@@ -93,14 +98,16 @@ Issues are stored in JSON format at:
 1. Click **☰** menu button
 2. Click **Export**
 3. Choose save location
-4. Issues are exported as `issues.json`
+4. Issues are exported as `issues.json` with full data (ID, timestamps, etc.)
 
 ### Import
 
 1. Click **☰** menu button
 2. Click **Import**
 3. Select a JSON file
-4. Choose to **Merge** (add to existing) or **Overwrite** (replace all)
+4. Choose:
+   - **Merge**: Add to existing issues (conflicting IDs get new UUIDs)
+   - **Overwrite**: Replace all existing issues with imported data
 
 ## License
 

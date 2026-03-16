@@ -109,11 +109,19 @@ header h1 {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    align-items: center;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .search-bar input {
-    flex: 1;
-    padding: 10px 12px;
+    width: 100%;
+    padding: 10px 30px 10px 12px;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
@@ -126,6 +134,26 @@ header h1 {
 
 .search-bar .btn-primary {
     padding: 10px 20px;
+}
+
+.clear-search-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #6a737d;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.clear-search-btn:hover {
+    color: #333;
+}
+
+.clear-search-btn.hidden {
+    display: none;
 }
 
 .btn-primary {

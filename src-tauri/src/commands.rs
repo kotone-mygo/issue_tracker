@@ -1,6 +1,7 @@
 use crate::models::{AppData, CreateIssueRequest, Issue, IssueStatus, UpdateIssueRequest};
 use crate::storage::Storage;
 use chrono::Utc;
+use std::collections::HashSet;
 use std::sync::Mutex;
 use tauri::State;
 
@@ -167,4 +168,34 @@ pub fn get_all_tags(state: State<AppState>) -> Result<Vec<String>, String> {
     tags.sort();
     tags.dedup();
     Ok(tags)
+}
+
+#[tauri::command]
+pub fn import_issues(
+    state: State<AppState>,
+    issues: Vec<Issue>,
+    merge: bool,
+) -> Result<(), String> {
+    let mut data = state.data.lock().map_err(|e| e.to_string())?;
+
+    if merge {
+        // Merge mode: add all issues, generate new ID for conflicts
+        let existing_ids: HashSet<String> = data.issues.iter().map(|i| i.id.clone()).collect();
+
+        let mut new_issues: Vec<Issue> = Vec::new();
+        for mut issue in issues {
+            if existing_ids.contains(&issue.id) {
+                issue.id = uuid::Uuid::new_v4().to_string();
+            }
+            new_issues.push(issue);
+        }
+        data.issues.extend(new_issues);
+    } else {
+        // Overwrite mode: replace all existing data with imported data
+        data.issues = issues;
+    }
+
+    state.storage.save(&data)?;
+
+    Ok(())
 }

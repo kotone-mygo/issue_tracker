@@ -26,7 +26,10 @@
             </header>
 
             <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search issues... (press / to focus)">
+                <div class="search-input-wrapper">
+                    <input type="text" id="searchInput" placeholder="Search issues... (press / to focus)">
+                    <button id="clearSearchBtn" class="clear-search-btn hidden">&times;</button>
+                </div>
                 <button id="searchBtn" class="btn-primary">Search</button>
             </div>
 
@@ -73,14 +76,6 @@
                 <div class="form-group">
                     <label for="description">Description</label>
                     <textarea id="description" rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status">
-                        <option value="Open">Open</option>
-                        <option value="InProgress">In Progress</option>
-                        <option value="Closed">Closed</option>
-                    </select>
                 </div>
                 <div class="form-group">
                     <label for="tags">Tags (comma separated)</label>

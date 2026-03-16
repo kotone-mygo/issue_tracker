@@ -22,6 +22,7 @@ pub fn run() {
             commands::filter_by_tag,
             commands::filter_by_status,
             commands::get_all_tags,
+            commands::import_issues,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

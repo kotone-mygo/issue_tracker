@@ -87,6 +87,8 @@ function renderIssues() {
         filtered = filtered.filter(i => i.tags.includes(tagFilter));
     }
 
+    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
     if (filtered.length === 0) {
         issuesList.innerHTML = '<div class="empty-state">No issues found</div>';
         return;
@@ -336,7 +338,8 @@ async function saveIssue(event) {
     const id = document.getElementById('issueId').value;
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
-    const status = document.getElementById('status').value;
+    const statusSelect = document.getElementById('status');
+    const status = statusSelect ? statusSelect.value : 'Open';
     const tags = document.getElementById('tags').value
         .split(',')
         .map(t => t.trim())
@@ -431,25 +434,16 @@ async function performImport(merge) {
     if (!pendingImportData) return;
     
     try {
-        if (!merge) {
-            for (const issue of issues) {
-                await invoke('delete_issue', { id: issue.id });
-            }
-        }
-        
-        for (const item of pendingImportData) {
-            await invoke('create_issue', {
-                request: {
-                    title: item.title || 'Untitled',
-                    description: item.description || '',
-                    tags: item.tags || []
-                }
-            });
-        }
+        await invoke('import_issues', {
+            issues: pendingImportData,
+            merge: merge
+        });
         
         document.getElementById('importModal').classList.remove('show');
         pendingImportData = null;
         await loadIssues();
+        
+        alert('Issues imported successfully!');
     } catch (error) {
         console.error('Failed to import:', error);
         alert('Failed to import: ' + error);
@@ -462,6 +456,19 @@ document.getElementById('searchInput').addEventListener('keypress', function(eve
     if (event.key === 'Enter') {
         renderIssues();
     }
+});
+document.getElementById('searchInput').addEventListener('input', function() {
+    const clearBtn = document.getElementById('clearSearchBtn');
+    if (this.value.trim()) {
+        clearBtn.classList.remove('hidden');
+    } else {
+        clearBtn.classList.add('hidden');
+    }
+});
+document.getElementById('clearSearchBtn').addEventListener('click', function() {
+    document.getElementById('searchInput').value = '';
+    this.classList.add('hidden');
+    renderIssues();
 });
 document.getElementById('backBtn').addEventListener('click', navigateToList);
 document.getElementById('editIssueBtn').addEventListener('click', showEditForm);
@@ -496,9 +503,13 @@ document.getElementById('cancelImport').addEventListener('click', function() {
 });
 
 window.addEventListener('click', (event) => {
-    if (event.target.classList.contains('modal')) {
+    // 只關閉 Import 和 Delete modal，不關閉 New Issue modal
+    if (event.target.classList.contains('modal') && 
+        !event.target.id.includes('issueModal')) {
         event.target.classList.remove('show');
     }
+    
+    // 3條線選單：點擊外部關閉
     const menuDropdown = document.getElementById('menuDropdown');
     const menuBtn = document.getElementById('menuBtn');
     if (!menuDropdown.classList.contains('hidden') && 
