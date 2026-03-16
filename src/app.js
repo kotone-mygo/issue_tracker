@@ -381,6 +381,81 @@ async function confirmDelete() {
     }
 }
 
+let pendingImportData = null;
+
+async function exportIssues() {
+    document.getElementById('menuDropdown').classList.add('hidden');
+    
+    const { save } = window.__TAURI__.dialog;
+    const { writeTextFile } = window.__TAURI__.fs;
+    
+    try {
+        const filePath = await save({
+            defaultPath: 'issues.json',
+            filters: [{ name: 'JSON', extensions: ['json'] }]
+        });
+        
+        if (filePath) {
+            const dataStr = JSON.stringify(issues, null, 2);
+            await writeTextFile(filePath, dataStr);
+            alert('Issues exported successfully!');
+        }
+    } catch (error) {
+        console.error('Export failed:', error);
+        alert('Failed to export: ' + error);
+    }
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!Array.isArray(data)) {
+                throw new Error('Invalid format');
+            }
+            pendingImportData = data;
+            document.getElementById('importModal').classList.add('show');
+        } catch (error) {
+            alert('Failed to parse file: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+async function performImport(merge) {
+    if (!pendingImportData) return;
+    
+    try {
+        if (!merge) {
+            for (const issue of issues) {
+                await invoke('delete_issue', { id: issue.id });
+            }
+        }
+        
+        for (const item of pendingImportData) {
+            await invoke('create_issue', {
+                request: {
+                    title: item.title || 'Untitled',
+                    description: item.description || '',
+                    tags: item.tags || []
+                }
+            });
+        }
+        
+        document.getElementById('importModal').classList.remove('show');
+        pendingImportData = null;
+        await loadIssues();
+    } catch (error) {
+        console.error('Failed to import:', error);
+        alert('Failed to import: ' + error);
+    }
+}
+
 document.getElementById('newIssueBtn').addEventListener('click', openModal);
 document.getElementById('searchBtn').addEventListener('click', renderIssues);
 document.getElementById('searchInput').addEventListener('keypress', function(event) {
@@ -398,9 +473,38 @@ document.getElementById('tagFilter').addEventListener('change', renderIssues);
 document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
 document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
 
+document.getElementById('menuBtn').addEventListener('click', function(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('menuDropdown');
+    dropdown.classList.toggle('hidden');
+});
+
+document.getElementById('exportBtn').addEventListener('click', exportIssues);
+document.getElementById('importBtn').addEventListener('click', function() {
+    document.getElementById('menuDropdown').classList.add('hidden');
+    document.getElementById('fileInput').click();
+});
+document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+document.getElementById('importMerge').addEventListener('click', function() {
+    performImport(true);
+});
+document.getElementById('importOverwrite').addEventListener('click', function() {
+    performImport(false);
+});
+document.getElementById('cancelImport').addEventListener('click', function() {
+    document.getElementById('importModal').classList.remove('show');
+});
+
 window.addEventListener('click', (event) => {
     if (event.target.classList.contains('modal')) {
         event.target.classList.remove('show');
+    }
+    const menuDropdown = document.getElementById('menuDropdown');
+    const menuBtn = document.getElementById('menuBtn');
+    if (!menuDropdown.classList.contains('hidden') && 
+        !menuDropdown.contains(event.target) && 
+        event.target !== menuBtn) {
+        menuDropdown.classList.add('hidden');
     }
 });
 

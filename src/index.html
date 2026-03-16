@@ -13,7 +13,16 @@
         <div id="listView">
             <header>
                 <h1>Issue Tracker</h1>
-                <button id="newIssueBtn" class="btn-primary">+ New Issue</button>
+                <div class="header-actions">
+                    <button id="newIssueBtn" class="btn-primary">+ New Issue</button>
+                    <div class="menu-container">
+                        <button id="menuBtn" class="menu-btn">☰</button>
+                        <div id="menuDropdown" class="menu-dropdown hidden">
+                            <button id="exportBtn" class="menu-item">Export</button>
+                            <button id="importBtn" class="menu-item">Import</button>
+                        </div>
+                    </div>
+                </div>
             </header>
 
             <div class="search-bar">
@@ -93,6 +102,22 @@
             </div>
         </div>
     </div>
+
+    <!-- Import Confirmation Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <h2>Import Issues</h2>
+            <p>How would you like to import the issues?</p>
+            <div class="modal-actions">
+                <button id="importMerge" class="btn-primary">Merge</button>
+                <button id="importOverwrite" class="btn-danger">Overwrite</button>
+                <button id="cancelImport" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
 
     <button id="backToTopBtn" class="back-to-top hidden">↑</button>
 
