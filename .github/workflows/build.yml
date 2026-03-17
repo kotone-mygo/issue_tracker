@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       # 安装系统依赖（仅 Linux）
       - name: Install Linux dependencies
@@ -46,7 +46,7 @@ jobs:
 
       # 缓存 Cargo 依赖
       - name: Cache Cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v5.0.3
         with:
           path: |
             ~/.cargo/registry
@@ -58,7 +58,7 @@ jobs:
 
       # 设置 Node.js 环境（Tauri CLI 需要）
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: "lts/*" # 可根据项目需求调整
           cache: "npm" # 如果项目有 package-lock.json 会自动缓存
@@ -85,7 +85,7 @@ jobs:
 
       # 上传构建产物
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: issue-tracker-${{ runner.os }}
           path: |
