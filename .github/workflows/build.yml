@@ -1,4 +1,4 @@
-name: Build Tauri App
+name: Build Issue Tracker
 
 on:
   push:
@@ -17,13 +17,13 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: tauri-app_*.deb # 根据你配置的输出文件名调整
+            artifact_name: issue-tracker_*.deb # 根据你配置的输出文件名调整
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact_name: tauri-app_*.dmg
+            artifact_name: issue-tracker_*.dmg
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: tauri-app_*.exe # 或者是 *.msi
+            artifact_name: issue-tracker_*.exe # 或者是 *.msi
 
     runs-on: ${{ matrix.os }}
 
@@ -89,9 +89,13 @@ jobs:
         with:
           name: tauri-app-${{ runner.os }}
           path: |
-            src-tauri/target/release/bundle/**/${{ matrix.artifact_name }}
-            !src-tauri/target/release/bundle/**/*.debug.*   # 排除调试文件（如果有）
-          if-no-files-found: error
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.rpm
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.msi
+          if-no-files-found: warn # 若找不到檔案僅警告，不中斷流程（方便除錯）
 
   # 如果需要发布 Release（当推送标签时自动创建 Release 并上传所有平台的安装包）
   release:
