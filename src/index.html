@@ -34,15 +34,25 @@
             </div>
 
             <div class="filters">
-                <select id="statusFilter">
-                    <option value="">All Status</option>
-                    <option value="Open">Open</option>
-                    <option value="InProgress">In Progress</option>
-                    <option value="Closed">Closed</option>
-                </select>
-                <select id="tagFilter">
-                    <option value="">All Tags</option>
-                </select>
+                <div class="filters-left">
+                    <select id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="Open">Open</option>
+                        <option value="InProgress">In Progress</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                    <select id="tagFilter">
+                        <option value="">All Tags</option>
+                    </select>
+                    <select id="sortByFilter">
+                        <option value="created">Sort By: Created</option>
+                        <option value="updated">Sort By: Updated</option>
+                    </select>
+                </div>
+                <button id="directionBtn" class="direction-btn">
+                    <span id="directionIcon">↓</span>
+                    <span id="directionText">Newest</span>
+                </button>
             </div>
 
             <div id="issuesList" class="issues-list"></div>

@@ -9,13 +9,14 @@ A cross-platform desktop application for tracking issues, built with Tauri (Rust
 - Create, read, update, and delete issues
 - Tag-based categorization
 - Filter by status or tags
+- Sort issues by created date or updated date
+- Toggle sort direction (newest/oldest)
 - Search issues by title or description
 - Markdown support for issue descriptions
 - Syntax highlighting for code blocks
 - Import and Export issues (JSON format)
 - Back to top button
 - Keyboard shortcut (`/` to focus search)
-- Issues sorted by newest first
 
 ## Tech Stack
 
@@ -75,6 +76,8 @@ Issues are stored in JSON format at:
 - Click **☰** menu button to access Import/Export options
 - Use search bar to find issues by title or description
 - Filter issues by status or tags
+- Sort issues by **Created** or **Updated** date
+- Click **direction button** (↓ Newest / ↑ Oldest) to toggle sort order
 - Click **×** in search bar to clear search
 
 ### Issue Detail Page

@@ -3,6 +3,7 @@ const { invoke } = window.__TAURI__.core;
 let issues = [];
 let allTags = [];
 let currentIssueId = null;
+let sortDirection = 'desc';
 
 const renderer = {
     code(token) {
@@ -64,10 +65,33 @@ async function loadTags() {
     }
 }
 
+function sortIssues(issues, sortBy, order) {
+    return [...issues].sort((a, b) => {
+        const dateA = new Date(sortBy === 'created' ? a.created_at : a.updated_at);
+        const dateB = new Date(sortBy === 'created' ? b.created_at : b.updated_at);
+        return order === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+}
+
+function toggleDirection() {
+    sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+    const icon = document.getElementById('directionIcon');
+    const text = document.getElementById('directionText');
+    if (sortDirection === 'desc') {
+        icon.textContent = '↓';
+        text.textContent = 'Newest';
+    } else {
+        icon.textContent = '↑';
+        text.textContent = 'Oldest';
+    }
+    renderIssues();
+}
+
 function renderIssues() {
     const issuesList = document.getElementById('issuesList');
     const statusFilter = document.getElementById('statusFilter').value;
     const tagFilter = document.getElementById('tagFilter').value;
+    const sortByFilter = document.getElementById('sortByFilter').value;
     const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
 
     let filtered = issues;
@@ -87,7 +111,7 @@ function renderIssues() {
         filtered = filtered.filter(i => i.tags.includes(tagFilter));
     }
 
-    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    filtered = sortIssues(filtered, sortByFilter, sortDirection);
 
     if (filtered.length === 0) {
         issuesList.innerHTML = '<div class="empty-state">No issues found</div>';
@@ -477,6 +501,8 @@ document.querySelector('.close').addEventListener('click', closeModal);
 document.getElementById('issueForm').addEventListener('submit', saveIssue);
 document.getElementById('statusFilter').addEventListener('change', renderIssues);
 document.getElementById('tagFilter').addEventListener('change', renderIssues);
+document.getElementById('sortByFilter').addEventListener('change', renderIssues);
+document.getElementById('directionBtn').addEventListener('click', toggleDirection);
 document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
 document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
 
