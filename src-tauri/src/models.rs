@@ -1,17 +1,12 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum IssueStatus {
+    #[default]
     Open,
     InProgress,
     Closed,
-}
-
-impl Default for IssueStatus {
-    fn default() -> Self {
-        IssueStatus::Open
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -59,4 +54,10 @@ pub struct UpdateIssueRequest {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AppData {
     pub issues: Vec<Issue>,
+}
+
+impl AppData {
+    pub fn new() -> Self {
+        Self { issues: Vec::new() }
+    }
 }

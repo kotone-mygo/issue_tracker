@@ -19,6 +19,19 @@ impl AppState {
             data: Mutex::new(data),
         }
     }
+
+    pub fn with_data(storage: Storage, data: AppData) -> Self {
+        Self {
+            storage,
+            data: Mutex::new(data),
+        }
+    }
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[tauri::command]

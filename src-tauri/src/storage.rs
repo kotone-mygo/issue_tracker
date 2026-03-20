@@ -21,6 +21,15 @@ impl Storage {
         Self { data_path }
     }
 
+    pub fn with_path(data_path: PathBuf) -> Self {
+        if let Some(parent) = data_path.parent() {
+            if !parent.exists() {
+                let _ = fs::create_dir_all(parent);
+            }
+        }
+        Self { data_path }
+    }
+
     pub fn load(&self) -> AppData {
         if !self.data_path.exists() {
             return AppData::default();

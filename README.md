@@ -54,6 +54,21 @@ npm run tauri build
 npm run tauri build -- --target x86_64-pc-windows-gnu
 ```
 
+### Testing
+
+```bash
+# Run all tests
+cargo test
+
+# Run a single test file
+cargo test --test models_tests
+cargo test --test commands_tests
+cargo test --test storage_tests
+
+# Run a single test
+cargo test test_issue_creation
+```
+
 ## Output
 
 Build artifacts will be in:
