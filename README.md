@@ -1,134 +1,140 @@
-<!-- markdownlint-disable MD013 -->
-
 # Issue Tracker
 
-A cross-platform desktop application for tracking issues, built with Tauri (Rust + Vanilla HTML/JS).
+Track issues, manage tasks, and organize your projects with a fast, cross-platform desktop app. No cloud required—your data stays on your device.
+
+![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+## Why Issue Tracker?
+
+- **No internet needed** — works completely offline
+- **Lightning fast** — built with Rust for native performance
+- **Your data, your device** — stored locally in JSON format
+- **Markdown support** — write descriptions with code highlighting
 
 ## Features
 
-- Create, read, update, and delete issues
-- Tag-based categorization
+- Create and manage issues with titles, descriptions, and tags
+- Track status: Open → In Progress → Closed
 - Filter by status or tags
-- Sort issues by created date or updated date
-- Toggle sort direction (newest/oldest)
-- Search issues by title or description
-- Markdown support for issue descriptions
-- Syntax highlighting for code blocks
-- Import and Export issues (JSON format)
-- Back to top button
-- Keyboard shortcut (`/` to focus search)
+- Sort by creation date or last update
+- Full-text search across titles and descriptions
+- Import and export your data for backup
 
-## Tech Stack
+## Installation
 
-- **Backend**: Rust + Tauri 2.x
-- **Frontend**: Vanilla HTML + CSS + JavaScript
-- **Storage**: JSON file
+### 1. Install system dependencies
 
-## Development
+```bash
+# Ubuntu/Debian
+sudo apt install pkg-config libglib2.0-dev libgtk-3-dev libwebkit2gtk-4.1-dev
 
-### Prerequisites
+# macOS
+xcode-select --install
 
-- **Linux**: `pkg-config`, `libglib2.0-dev`, `libgtk-3-dev`, `libwebkit2gtk-4.1-dev`
-- **macOS**: Xcode Command Line Tools
-- **Windows**: Visual Studio Build Tools
+# Windows
+# Install Visual Studio Build Tools
+```
 
-### Install Dependencies
+### 2. Install and run
 
 ```bash
 npm install
+npm run tauri dev
 ```
 
-### Development Mode
+## Usage
+
+### Create your first issue
+
+1. Click **+ New Issue**
+2. Add a title and description (Markdown supported)
+3. Add tags like `bug`, `feature`, or `urgent`
+4. Click **Save**
+
+### Find issues quickly
+
+| What you want | How to do it |
+|---------------|--------------|
+| Search by keyword | Type in the search bar |
+| Filter by status | Use the **Status** dropdown |
+| Filter by tag | Use the **Tags** dropdown |
+| Sort differently | Choose Created/Updated, then click the arrow |
+
+### Keyboard shortcut
+
+Press `/` anywhere on the list page to jump to the search bar.
+
+### Import and export
+
+Export your data for backup:
+
+1. Click the **☰** menu
+2. Select **Export**
+3. Choose where to save `issues.json`
+
+Import existing data:
+
+1. Click the **☰** menu
+2. Select **Import**
+3. Choose your JSON file
+4. Pick **Merge** (add to existing) or **Overwrite** (replace all)
+
+## Build from source
+
+### Development
 
 ```bash
 npm run tauri dev
 ```
 
-### Build
+### Production build
 
 ```bash
-# Build for current platform
+# Build for your current platform
 npm run tauri build
 
-# Build for Windows (Linux with mingw-w64)
+# Cross-compile for Windows (from Linux)
 npm run tauri build -- --target x86_64-pc-windows-gnu
 ```
 
-### Testing
+### Run tests
 
 ```bash
-# Run all tests
+# All tests
 cargo test
 
-# Run a single test file
+# Single test file
 cargo test --test models_tests
 cargo test --test commands_tests
 cargo test --test storage_tests
-
-# Run a single test
-cargo test test_issue_creation
 ```
 
-## Output
+## Where your data is stored
 
-Build artifacts will be in:
+| Platform | Location |
+|----------|----------|
+| Linux | `~/.local/share/issue-tracker/issues.json` |
+| macOS | `~/Library/Application Support/com.issue-tracker/issues.json` |
+| Windows | `%LOCALAPPDATA%\issue-tracker\issues.json` |
 
-- **Linux**: `src-tauri/target/release/issue-tracker`
-- **Windows**: `src-tauri/target/x86_64-pc-windows-gnu/release/issue-tracker.exe`
+## Tech stack
 
-## Data Storage
+| Layer | What we used |
+|-------|--------------|
+| Desktop framework | Tauri 2.x |
+| Backend language | Rust |
+| Frontend | Vanilla HTML + CSS + JavaScript |
+| Text formatting | marked.js + highlight.js |
 
-Issues are stored in JSON format at:
+## Project layout
 
-- **Linux**: `~/.local/share/issue-tracker/issues.json`
-- **Windows**: `%LOCALAPPDATA%\issue-tracker\issues.json`
-
-## Usage
-
-### Main Page
-
-- Click **+ New Issue** to create a new issue
-- Click **☰** menu button to access Import/Export options
-- Use search bar to find issues by title or description
-- Filter issues by status or tags
-- Sort issues by **Created** or **Updated** date
-- Click **direction button** (↓ Newest / ↑ Oldest) to toggle sort order
-- Click **×** in search bar to clear search
-
-### Issue Detail Page
-
-- View full issue details with rendered Markdown
-- Edit issue (title, description, status, tags)
-- Delete issue (with confirmation)
-- Status can only be changed in detail page
-
-## Keyboard Shortcuts
-
-| Shortcut     | Action                            |
-| ------------ | --------------------------------- |
-| `/`          | Focus search input (on list page) |
-| `↑` (scroll) | Show back to top button           |
-
-## Import / Export
-
-### Export
-
-1. Click **☰** menu button
-2. Click **Export**
-3. Choose save location
-4. Issues are exported as `issues.json` with full data (ID, timestamps, etc.)
-
-### Import
-
-1. Click **☰** menu button
-2. Click **Import**
-3. Select a JSON file
-4. Choose:
-   - **Merge**: Add to existing issues (conflicting IDs get new UUIDs)
-   - **Overwrite**: Replace all existing issues with imported data
+```
+src/                     # Frontend code
+src-tauri/src/           # Rust backend
+src-tauri/tests/         # Unit tests (50 tests)
+```
 
 ## License
 
 MIT
-
-<!-- markdownlint-enable MD013 -->
