@@ -14,6 +14,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::get_issues,
             commands::get_issue,
+            commands::get_issue_by_number,
             commands::create_issue,
             commands::update_issue,
             commands::delete_issue,

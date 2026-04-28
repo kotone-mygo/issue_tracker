@@ -4,6 +4,7 @@ use issue_tracker_lib::models::{AppData, Issue, IssueStatus};
 pub fn create_test_issue(title: &str, tags: Vec<&str>) -> Issue {
     Issue {
         id: uuid::Uuid::new_v4().to_string(),
+        number: 0,
         title: title.to_string(),
         description: "Test description".to_string(),
         status: IssueStatus::Open,
@@ -16,6 +17,7 @@ pub fn create_test_issue(title: &str, tags: Vec<&str>) -> Issue {
 pub fn create_test_issue_with_status(title: &str, status: IssueStatus, tags: Vec<&str>) -> Issue {
     Issue {
         id: uuid::Uuid::new_v4().to_string(),
+        number: 0,
         title: title.to_string(),
         description: "Test description".to_string(),
         status,
@@ -28,6 +30,7 @@ pub fn create_test_issue_with_status(title: &str, status: IssueStatus, tags: Vec
 pub fn create_test_issue_with_id(id: &str, title: &str, tags: Vec<&str>) -> Issue {
     Issue {
         id: id.to_string(),
+        number: 0,
         title: title.to_string(),
         description: "Test description".to_string(),
         status: IssueStatus::Open,

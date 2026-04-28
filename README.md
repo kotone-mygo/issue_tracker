@@ -19,6 +19,7 @@ Track issues, manage tasks, and organize your projects with a fast, cross-platfo
 - Filter by status or tags
 - Sort by creation date or last update
 - Full-text search across titles and descriptions
+- **Issue references** — use `#123` in descriptions to link to other issues
 - Import and export your data for backup
 
 ## Installation

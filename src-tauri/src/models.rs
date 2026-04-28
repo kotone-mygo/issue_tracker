@@ -12,6 +12,8 @@ pub enum IssueStatus {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Issue {
     pub id: String,
+    #[serde(default)]
+    pub number: u32,
     pub title: String,
     pub description: String,
     pub status: IssueStatus,
@@ -21,10 +23,11 @@ pub struct Issue {
 }
 
 impl Issue {
-    pub fn new(title: String, description: String, tags: Vec<String>) -> Self {
+    pub fn new(number: u32, title: String, description: String, tags: Vec<String>) -> Self {
         let now = Utc::now();
         Self {
             id: uuid::Uuid::new_v4().to_string(),
+            number,
             title,
             description,
             status: IssueStatus::default(),

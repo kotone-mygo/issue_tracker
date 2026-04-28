@@ -339,8 +339,14 @@ header h1 {
 .detail-title {
     font-size: 24px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 4px;
     color: #24292e;
+}
+
+.detail-issue-number {
+    font-size: 14px;
+    color: #6a737d;
+    margin-bottom: 16px;
 }
 
 .detail-section {
@@ -683,4 +689,24 @@ header h1 {
 .back-to-top.hidden {
     opacity: 0;
     pointer-events: none;
+}
+
+.issue-number {
+    font-size: 12px;
+    color: #6a737d;
+    margin-top: 4px;
+}
+
+.issue-ref {
+    color: #0366d6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.issue-ref:hover {
+    text-decoration: underline;
+}
+
+.issue-ref-unresolved {
+    color: #6a737d;
 }

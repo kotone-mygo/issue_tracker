@@ -37,7 +37,13 @@ impl TestAppState {
 
     fn create_issue(&self, request: CreateIssueRequest) -> Issue {
         let mut data = self.data.lock().unwrap();
-        let issue = Issue::new(request.title, request.description, request.tags);
+        let max_number = data.issues.iter().map(|i| i.number).max().unwrap_or(0);
+        let issue = Issue::new(
+            max_number + 1,
+            request.title,
+            request.description,
+            request.tags,
+        );
         data.issues.push(issue.clone());
         issue
     }
@@ -122,12 +128,13 @@ impl TestAppState {
         let mut data = self.data.lock().unwrap();
 
         if merge {
-            let existing_ids: HashSet<String> = data.issues.iter().map(|i| i.id.clone()).collect();
+            let existing_numbers: HashSet<u32> = data.issues.iter().map(|i| i.number).collect();
 
             let mut new_issues: Vec<Issue> = Vec::new();
             for mut issue in issues {
-                if existing_ids.contains(&issue.id) {
-                    issue.id = uuid::Uuid::new_v4().to_string();
+                if existing_numbers.contains(&issue.number) {
+                    let max_number = data.issues.iter().map(|i| i.number).max().unwrap_or(0);
+                    issue.number = max_number + 1;
                 }
                 new_issues.push(issue);
             }
@@ -184,6 +191,7 @@ fn test_create_issue() {
     let issue = state.create_issue(request);
 
     assert!(!issue.id.is_empty());
+    assert_eq!(issue.number, 1);
     assert_eq!(issue.title, "New Issue");
     assert_eq!(issue.description, "Description");
     assert_eq!(issue.tags, vec!["bug"]);

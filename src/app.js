@@ -46,6 +46,28 @@ function renderMarkdown(text) {
     return DOMPurify.sanitize(html);
 }
 
+async function renderDescription(text) {
+    if (!text) return '';
+    try {
+        const html = marked.parse(text);
+        const sanitized = DOMPurify.sanitize(html);
+        return processIssueLinks(sanitized);
+    } catch (error) {
+        console.error('Error rendering description:', error);
+        return text;
+    }
+}
+
+function processIssueLinks(html) {
+    return html.replace(/#(\d+)/g, (_, number) => {
+        const num = parseInt(number, 10);
+        const issue = issues.find(i => i.number === num);
+        return issue 
+            ? `<a href="#issue/${issue.id}" class="issue-ref" onclick="event.preventDefault(); navigateToDetail('${issue.id}');">#${number}</a>`
+            : `<span class="issue-ref-unresolved">#${number}</span>`;
+    });
+}
+
 async function loadIssues() {
     try {
         issues = await invoke('get_issues');
@@ -124,6 +146,7 @@ function renderIssues() {
                 <span class="issue-title">${escapeHtml(issue.title)}</span>
                 <span class="issue-status status-${issue.status.toLowerCase()}">${formatStatus(issue.status)}</span>
             </div>
+            <div class="issue-number">#${issue.number}</div>
             <div class="issue-tags">
                 ${issue.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
             </div>
@@ -154,55 +177,63 @@ function showListView() {
     loadIssues();
 }
 
-function showDetailView(issueId) {
-    const issue = issues.find(i => i.id === issueId);
-    if (!issue) {
-        navigateToList();
-        return;
-    }
+async function showDetailView(issueId) {
+    try {
+        const issue = issues.find(i => i.id === issueId);
+        if (!issue) {
+            navigateToList();
+            return;
+        }
 
-    currentIssueId = issueId;
-    document.getElementById('listView').classList.add('hidden');
-    document.getElementById('detailView').classList.remove('hidden');
+        currentIssueId = issueId;
+        document.getElementById('listView').classList.add('hidden');
+        document.getElementById('detailView').classList.remove('hidden');
 
-    const content = document.getElementById('detailContent');
-    content.innerHTML = `
-        <h1 class="detail-title">${escapeHtml(issue.title)}</h1>
+        const descriptionHtml = await renderDescription(issue.description);
         
-        <div class="edit-section">
-            <label>Status</label>
-            <select id="detailStatus" onchange="updateIssueStatus('${issue.id}', this.value)">
-                <option value="Open" ${issue.status === 'Open' ? 'selected' : ''}>Open</option>
-                <option value="InProgress" ${issue.status === 'InProgress' ? 'selected' : ''}>In Progress</option>
-                <option value="Closed" ${issue.status === 'Closed' ? 'selected' : ''}>Closed</option>
-            </select>
-        </div>
+        const content = document.getElementById('detailContent');
+        content.innerHTML = `
+            <h1 class="detail-title">${escapeHtml(issue.title)}</h1>
+            <div class="detail-issue-number">#${issue.number}</div>
+            
+            <div class="edit-section">
+                <label>Status</label>
+                <select id="detailStatus" onchange="updateIssueStatus('${issue.id}', this.value)">
+                    <option value="Open" ${issue.status === 'Open' ? 'selected' : ''}>Open</option>
+                    <option value="InProgress" ${issue.status === 'InProgress' ? 'selected' : ''}>In Progress</option>
+                    <option value="Closed" ${issue.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                </select>
+            </div>
 
-        <div class="detail-section">
-            <div class="detail-label">Description</div>
-            <div class="detail-value detail-description">${renderMarkdown(issue.description) || 'No description'}</div>
-        </div>
+            <div class="detail-section">
+                <div class="detail-label">Description</div>
+                <div class="detail-value detail-description">${descriptionHtml || 'No description'}</div>
+            </div>
 
-        <div class="detail-section">
-            <div class="detail-label">Tags</div>
-            <div class="detail-tags" id="detailTags">
-                ${issue.tags.map(tag => `
-                    <span class="detail-tag">
-                        ${escapeHtml(tag)}
-                        <span class="detail-tag-remove" onclick="removeTag('${issue.id}', '${escapeHtml(tag)}')">&times;</span>
-                    </span>
-                `).join('')}
-                <div class="tag-input-wrapper">
-                    <input type="text" id="newTagInput" placeholder="Add tag..." onkeypress="handleTagInput(event, '${issue.id}')">
+            <div class="detail-section">
+                <div class="detail-label">Tags</div>
+                <div class="detail-tags" id="detailTags">
+                    ${issue.tags.map(tag => `
+                        <span class="detail-tag">
+                            ${escapeHtml(tag)}
+                            <span class="detail-tag-remove" onclick="removeTag('${issue.id}', '${escapeHtml(tag)}')">&times;</span>
+                        </span>
+                    `).join('')}
+                    <div class="tag-input-wrapper">
+                        <input type="text" id="newTagInput" placeholder="Add tag..." onkeypress="handleTagInput(event, '${issue.id}')">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="detail-meta">
-            Created: ${formatDate(issue.created_at)}<br>
-            Updated: ${formatDate(issue.updated_at)}
+            <div class="detail-meta">
+                Created: ${formatDate(issue.created_at)}<br>
+                Updated: ${formatDate(issue.updated_at)}
         </div>
     `;
+    } catch (error) {
+        console.error('Error showing detail view:', error);
+        navigateToList();
+    }
 }
 
 function showEditForm() {

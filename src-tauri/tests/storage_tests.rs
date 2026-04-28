@@ -6,6 +6,7 @@ use std::path::PathBuf;
 fn create_test_issue(title: &str, tags: Vec<&str>) -> Issue {
     Issue {
         id: uuid::Uuid::new_v4().to_string(),
+        number: 0,
         title: title.to_string(),
         description: "Test description".to_string(),
         status: IssueStatus::Open,
@@ -31,6 +32,7 @@ fn create_test_data(count: usize) -> AppData {
         issues: (0..count)
             .map(|i| Issue {
                 id: format!("id-{}", i),
+                number: (i + 1) as u32,
                 title: format!("Issue {}", i),
                 description: format!("Description {}", i),
                 status: IssueStatus::Open,

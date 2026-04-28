@@ -9,6 +9,7 @@ use issue_tracker_lib::models::{AppData, Issue, IssueStatus};
 #[test]
 fn test_issue_new_creates_issue_with_valid_uuid() {
     let issue = Issue::new(
+        1,
         "Test Title".into(),
         "Test Description".into(),
         vec!["bug".into()],
@@ -20,7 +21,7 @@ fn test_issue_new_creates_issue_with_valid_uuid() {
 
 #[test]
 fn test_issue_new_sets_title_and_description() {
-    let issue = Issue::new("My Title".into(), "My Description".into(), vec![]);
+    let issue = Issue::new(2, "My Title".into(), "My Description".into(), vec![]);
 
     assert_eq!(issue.title, "My Title");
     assert_eq!(issue.description, "My Description");
@@ -28,7 +29,7 @@ fn test_issue_new_sets_title_and_description() {
 
 #[test]
 fn test_issue_new_sets_default_status_to_open() {
-    let issue = Issue::new("Title".into(), "Description".into(), vec![]);
+    let issue = Issue::new(3, "Title".into(), "Description".into(), vec![]);
 
     assert_eq!(issue.status, IssueStatus::Open);
 }
@@ -36,6 +37,7 @@ fn test_issue_new_sets_default_status_to_open() {
 #[test]
 fn test_issue_new_sets_tags() {
     let issue = Issue::new(
+        4,
         "Title".into(),
         "Description".into(),
         vec!["bug".into(), "urgent".into()],
@@ -48,7 +50,7 @@ fn test_issue_new_sets_tags() {
 
 #[test]
 fn test_issue_new_sets_timestamps_equal() {
-    let issue = Issue::new("Title".into(), "Description".into(), vec![]);
+    let issue = Issue::new(5, "Title".into(), "Description".into(), vec![]);
 
     assert_eq!(issue.created_at, issue.updated_at);
 }
@@ -138,6 +140,7 @@ fn test_create_empty_app_data() {
 #[test]
 fn test_issue_serialization_roundtrip() {
     let issue = Issue::new(
+        6,
         "Test Title".into(),
         "Test Description".into(),
         vec!["bug".into()],
@@ -147,6 +150,7 @@ fn test_issue_serialization_roundtrip() {
     let deserialized: Issue = serde_json::from_str(&json).unwrap();
 
     assert_eq!(deserialized.id, issue.id);
+    assert_eq!(deserialized.number, issue.number);
     assert_eq!(deserialized.title, issue.title);
     assert_eq!(deserialized.description, issue.description);
     assert_eq!(deserialized.status, issue.status);

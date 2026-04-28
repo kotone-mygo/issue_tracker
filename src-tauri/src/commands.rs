@@ -13,7 +13,17 @@ pub struct AppState {
 impl AppState {
     pub fn new() -> Self {
         let storage = Storage::new();
-        let data = storage.load();
+        let mut data = storage.load();
+        
+        let max_number = data.issues.iter().map(|i| i.number).max().unwrap_or(0);
+        let mut next_number = max_number;
+        for issue in &mut data.issues {
+            if issue.number == 0 {
+                next_number += 1;
+                issue.number = next_number;
+            }
+        }
+        
         Self {
             storage,
             data: Mutex::new(data),
@@ -47,10 +57,19 @@ pub fn get_issue(state: State<AppState>, id: String) -> Result<Option<Issue>, St
 }
 
 #[tauri::command]
+pub fn get_issue_by_number(state: State<AppState>, number: u32) -> Result<Option<Issue>, String> {
+    let data = state.data.lock().map_err(|e| e.to_string())?;
+    Ok(data.issues.iter().find(|i| i.number == number).cloned())
+}
+
+#[tauri::command]
 pub fn create_issue(state: State<AppState>, request: CreateIssueRequest) -> Result<Issue, String> {
     let mut data = state.data.lock().map_err(|e| e.to_string())?;
 
-    let issue = Issue::new(request.title, request.description, request.tags);
+    let max_number = data.issues.iter().map(|i| i.number).max().unwrap_or(0);
+    let new_number = max_number + 1;
+
+    let issue = Issue::new(new_number, request.title, request.description, request.tags);
     data.issues.push(issue.clone());
 
     state.storage.save(&data)?;
@@ -192,19 +211,29 @@ pub fn import_issues(
     let mut data = state.data.lock().map_err(|e| e.to_string())?;
 
     if merge {
-        // Merge mode: add all issues, generate new ID for conflicts
-        let existing_ids: HashSet<String> = data.issues.iter().map(|i| i.id.clone()).collect();
+        let mut used_numbers: HashSet<u32> = data.issues.iter().map(|i| i.number).collect();
+        let mut max_number = used_numbers.iter().max().copied().unwrap_or(0);
 
         let mut new_issues: Vec<Issue> = Vec::new();
         for mut issue in issues {
-            if existing_ids.contains(&issue.id) {
-                issue.id = uuid::Uuid::new_v4().to_string();
+            if used_numbers.contains(&issue.number) || issue.number == 0 {
+                max_number += 1;
+                issue.number = max_number;
             }
+            used_numbers.insert(issue.number);
             new_issues.push(issue);
         }
         data.issues.extend(new_issues);
     } else {
-        // Overwrite mode: replace all existing data with imported data
+        let mut imported_numbers: HashSet<u32> = HashSet::new();
+
+        for issue in &issues {
+            if imported_numbers.contains(&issue.number) {
+                return Err(format!("Duplicate issue number {} in import", issue.number));
+            }
+            imported_numbers.insert(issue.number);
+        }
+
         data.issues = issues;
     }
 
