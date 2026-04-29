@@ -20,6 +20,8 @@ Track issues, manage tasks, and organize your projects with a fast, cross-platfo
 - Sort by creation date or last update
 - Full-text search across titles and descriptions
 - **Issue references** — use `#123` in descriptions to link to other issues
+  - Click `#123` links to jump to referenced issues
+  - **Multi-level back navigation** — "Previous Issue" button appears when navigating via references, allowing you to go back through multiple referenced issues
 - Import and export your data for backup
 
 ## Installation

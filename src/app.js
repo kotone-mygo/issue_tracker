@@ -4,6 +4,7 @@ let issues = [];
 let allTags = [];
 let currentIssueId = null;
 let sortDirection = 'desc';
+let navigationStack = [];
 
 const renderer = {
     code(token) {
@@ -63,7 +64,7 @@ function processIssueLinks(html) {
         const num = parseInt(number, 10);
         const issue = issues.find(i => i.number === num);
         return issue 
-            ? `<a href="#issue/${issue.id}" class="issue-ref" onclick="event.preventDefault(); navigateToDetail('${issue.id}');">#${number}</a>`
+            ? `<a href="#issue/${issue.id}" class="issue-ref" onclick="event.preventDefault(); navigateViaReference('${issue.id}');">#${number}</a>`
             : `<span class="issue-ref-unresolved">#${number}</span>`;
     });
 }
@@ -163,16 +164,47 @@ function renderTagFilters() {
 }
 
 function navigateToDetail(issueId) {
+    navigationStack = [];
     window.location.hash = `issue/${issueId}`;
 }
 
 function navigateToList() {
+    navigationStack = [];
     window.location.hash = '';
 }
 
+function navigateViaReference(targetIssueId) {
+    if (currentIssueId) {
+        navigationStack.push(currentIssueId);
+    }
+    window.location.hash = `issue/${targetIssueId}`;
+}
+
+function goToPrevIssue() {
+    if (navigationStack.length === 0) return;
+    const prevIssueId = navigationStack.pop();
+    if (!issues.some(i => i.id === prevIssueId)) {
+        navigationStack = [];
+        navigateToList();
+        return;
+    }
+    window.location.hash = `issue/${prevIssueId}`;
+}
+
+function updatePrevButtonVisibility() {
+    const prevBtn = document.getElementById('prevIssueBtn');
+    if (navigationStack.length > 0) {
+        prevBtn.classList.remove('hidden');
+    } else {
+        prevBtn.classList.add('hidden');
+    }
+}
+
 function showListView() {
+    navigationStack = [];
     document.getElementById('listView').classList.remove('hidden');
     document.getElementById('detailView').classList.add('hidden');
+    document.getElementById('prevIssueBtn').classList.add('hidden');
     currentIssueId = null;
     loadIssues();
 }
@@ -188,6 +220,8 @@ async function showDetailView(issueId) {
         currentIssueId = issueId;
         document.getElementById('listView').classList.add('hidden');
         document.getElementById('detailView').classList.remove('hidden');
+
+        updatePrevButtonVisibility();
 
         const descriptionHtml = await renderDescription(issue.description);
         
@@ -526,6 +560,7 @@ document.getElementById('clearSearchBtn').addEventListener('click', function() {
     renderIssues();
 });
 document.getElementById('backBtn').addEventListener('click', navigateToList);
+document.getElementById('prevIssueBtn').addEventListener('click', goToPrevIssue);
 document.getElementById('editIssueBtn').addEventListener('click', showEditForm);
 document.getElementById('deleteIssueBtn').addEventListener('click', showDeleteModal);
 document.querySelector('.close').addEventListener('click', closeModal);
@@ -605,6 +640,8 @@ document.addEventListener('keydown', function(event) {
 });
 
 window.navigateToDetail = navigateToDetail;
+window.navigateViaReference = navigateViaReference;
+window.goToPrevIssue = goToPrevIssue;
 window.removeTag = removeTag;
 window.handleTagInput = handleTagInput;
 window.updateIssueStatus = updateIssueStatus;
