@@ -1,32 +1,39 @@
+<!-- prettier-ignore -->
+<div align="center">
+
+<img src="src-tauri/icons/32x32.png" alt="Issue Tracker" height="64" />
+
 # Issue Tracker
 
-Track issues, manage tasks, and organize your projects with a fast, cross-platform desktop app. No cloud required—your data stays on your device.
+Track issues, manage tasks, and organize your projects with a fast, cross-platform desktop app.
 
-![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)](https://github.com/anomalyco/issue_tracker)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Tauri](https://img.shields.io/badge/Tauri-2.x-3288e6)](https://tauri.app)
+[![Rust](https://img.shields.io/badge/Rust-2021-orange)](https://www.rust-lang.org)
 
-## Why Issue Tracker?
+[Features](#features) • [Quick Start](#quick-start) • [Usage](#usage) • [Build](#build) • [Testing](#testing)
 
-- **No internet needed** — works completely offline
-- **Lightning fast** — built with Rust for native performance
-- **Your data, your device** — stored locally in JSON format
-- **Markdown support** — write descriptions with code highlighting
+</div>
+
+A lightweight, offline-first desktop application for issue tracking. No cloud required — your data stays on your device, stored locally in JSON format.
 
 ## Features
 
-- Create and manage issues with titles, descriptions, and tags
-- Track status: Open → In Progress → Closed
-- Filter by status or tags
-- Sort by creation date or last update
-- Full-text search across titles and descriptions
-- **Issue references** — use `#123` in descriptions to link to other issues
-  - Click `#123` links to jump to referenced issues
-  - **Multi-level back navigation** — "Previous Issue" button appears when navigating via references, allowing you to go back through multiple referenced issues
-- Import and export your data for backup
+- **Offline native performance** — built with Rust and Tauri for speed
+- **Issue management** — create, update, and track issues with titles, descriptions, and tags
+- **Status workflow** — Open → In Progress → Closed
+- **Smart filtering** — filter by status, tags, or full-text search across titles and descriptions
+- **Issue references** — use `#123` in descriptions to link related issues, with click-to-navigate and hover preview
+- **Multi-level navigation** — "Previous Issue" button appears when navigating via references
+- **Import & Export** — backup and restore your data in JSON format
+- **Markdown support** — write descriptions with code highlighting
 
-## Installation
+## Quick Start
 
-### 1. Install system dependencies
+### Prerequisites
+
+**System dependencies:**
 
 ```bash
 # Ubuntu/Debian
@@ -36,19 +43,29 @@ sudo apt install pkg-config libglib2.0-dev libgtk-3-dev libwebkit2gtk-4.1-dev
 xcode-select --install
 
 # Windows
-# Install Visual Studio Build Tools
+# Install Visual Studio Build Tools with C++ support
 ```
 
-### 2. Install and run
+**Runtime:**
+
+- [Node.js](https://nodejs.org) LTS
+- [Rust](https://www.rust-lang.org) (latest stable)
+
+### Development
 
 ```bash
 npm install
 npm run tauri dev
 ```
 
+The app will launch with hot reload enabled.
+
+> [!TIP]
+> Press `/` anywhere on the list page to jump to the search bar.
+
 ## Usage
 
-### Create your first issue
+### Create an issue
 
 1. Click **+ New Issue**
 2. Add a title and description (Markdown supported)
@@ -64,80 +81,95 @@ npm run tauri dev
 | Filter by tag | Use the **Tags** dropdown |
 | Sort differently | Choose Created/Updated, then click the arrow |
 
-### Keyboard shortcut
+### Issue references
 
-Press `/` anywhere on the list page to jump to the search bar.
+Link related issues using `#` followed by the issue number:
+
+- Type `#123` in any description to create a reference
+- Click `#123` links to jump to the referenced issue
+- Hover over `#123` links to preview the issue title and status
+- Use the **Previous Issue** button to navigate back through reference chains
 
 ### Import and export
 
-Export your data for backup:
-
+**Export:**
 1. Click the **☰** menu
 2. Select **Export**
 3. Choose where to save `issues.json`
 
-Import existing data:
-
+**Import:**
 1. Click the **☰** menu
 2. Select **Import**
 3. Choose your JSON file
 4. Pick **Merge** (add to existing) or **Overwrite** (replace all)
 
-## Build from source
-
-### Development
-
-```bash
-npm run tauri dev
-```
+## Build
 
 ### Production build
 
 ```bash
-# Build for your current platform
 npm run tauri build
+```
 
-# Cross-compile for Windows (from Linux)
+### Cross-compile
+
+```bash
+# From Linux to Windows
 npm run tauri build -- --target x86_64-pc-windows-gnu
 ```
 
-### Run tests
+## Testing
+
+Run all tests from the `src-tauri` directory:
 
 ```bash
-# All tests
-cargo test
+cd src-tauri && cargo test
+```
 
-# Single test file
+Run specific test files:
+
+```bash
 cargo test --test models_tests
 cargo test --test commands_tests
 cargo test --test storage_tests
 ```
 
-## Where your data is stored
+> [!NOTE]
+> Tests use temporary paths via `Storage::with_path(temp_path)` to avoid touching real data. Test fixtures are shared via `tests/common/fixtures.rs`.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-------------|
+| Desktop framework | [Tauri 2.x](https://tauri.app) |
+| Backend | Rust (edition 2021) |
+| Frontend | Vanilla HTML + CSS + JavaScript |
+| Text rendering | [marked.js](https://marked.js.org) + [highlight.js](https://highlightjs.org) |
+| Storage | JSON via [`dirs`](https://crates.io/crates/dirs) crate |
+
+## Project Structure
+
+```
+src/                     # Frontend (Vanilla JS, no build step)
+src-tauri/
+  ├── src/
+  │   ├── lib.rs         # Entry point, state management
+  │   ├── commands.rs    # Tauri commands (invoke handlers)
+  │   ├── models.rs     # Data structures (Issue, AppData)
+  │   └── storage.rs    # JSON persistence layer
+  └── tests/
+      ├── common/        # Shared test fixtures
+      ├── models_tests.rs
+      ├── commands_tests.rs
+      └── storage_tests.rs
+```
+
+## Data Storage
+
+Your data is stored locally in JSON format:
 
 | Platform | Location |
 |----------|----------|
 | Linux | `~/.local/share/issue-tracker/issues.json` |
 | macOS | `~/Library/Application Support/com.issue-tracker/issues.json` |
 | Windows | `%LOCALAPPDATA%\issue-tracker\issues.json` |
-
-## Tech stack
-
-| Layer | What we used |
-|-------|--------------|
-| Desktop framework | Tauri 2.x |
-| Backend language | Rust |
-| Frontend | Vanilla HTML + CSS + JavaScript |
-| Text formatting | marked.js + highlight.js |
-
-## Project layout
-
-```
-src/                     # Frontend code
-src-tauri/src/           # Rust backend
-src-tauri/tests/         # Unit tests (50 tests)
-```
-
-## License
-
-MIT

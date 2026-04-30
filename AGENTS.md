@@ -1,50 +1,21 @@
 # AGENTS.md - Issue Tracker
 
-## Build
+## Build & Test
 ```bash
-npm install
-npm run tauri dev      # dev with hot reload
-npm run tauri build   # production
-```
+npm install && npm run tauri dev    # dev with hot reload
+npm run tauri build                 # production build
 
-## Test
-```bash
-cargo test                              # all tests
-cargo test --test models_tests       # specific file
+cd src-tauri && cargo test          # all tests (must run from src-tauri/)
+cargo test --test models_tests      # specific test file
 cargo test --test commands_tests
 cargo test --test storage_tests
 ```
 
-## Structure
-```
-src/                    # Frontend (HTML/CSS/JS)
-src-tauri/src/          # Rust backend
-src-tauri/tests/        # Integration tests
-```
-
-## Stack
-- **Backend**: Rust + Tauri 2.x
-- **Frontend**: Vanilla HTML/CSS/JS
-- **Plugins**: tauri-plugin-opener, tauri-plugin-dialog, tauri-plugin-fs
-- **MD**: marked.js, highlight.js
-- **Storage**: JSON (platform-specific)
-
-## System deps
-- **Linux**: `pkg-config libglib2.0-dev libgtk-3-dev libwebkit2gtk-4.1-dev`
-- **macOS**: Xcode CLT
-- **Windows**: VS Build Tools
-
-## Data locations
-- **Linux**: `~/.local/share/issue-tracker/issues.json`
-- **Windows**: `%LOCALAPPDATA%\issue-tracker\issues.json`
-- **macOS**: `~/Library/Application Support/com.issue-tracker/issues.json`
-
-## Available Commands
-| Command | Description |
-|---------|-------------|
-| get_issues / get_issue | List/get |
-| create_issue / update_issue / delete_issue | CRUD |
-| add_tag / remove_tag | Tag management |
-| filter_by_tag / filter_by_status | Filter |
-| get_all_tags | List tags |
-| import_issues | Import (merge/overwrite) |
+## Key Quirks
+- **Frontend**: Vanilla HTML/CSS/JS, no build step — `frontendDist: "../src"` in `tauri.conf.json`
+- **Tauri access**: `withGlobalTauri: true` → use `window.__TAURI__.core`, not npm packages
+- **Lib name**: `issue_tracker_lib` (not `issue_tracker`) — see `src-tauri/Cargo.toml` `[lib]` section
+- **State**: `commands::AppState` wraps `Mutex<AppData>` + `Storage`, initialized in `lib.rs`
+- **Tests**: `mod common;` pattern with fixtures in `tests/common/fixtures.rs`; storage tests use `Storage::with_path(temp_path)` to avoid real data
+- **Storage**: JSON via `dirs` crate → `~/.local/share/issue-tracker/issues.json` on Linux
+- **No custom lint/format config** — uses Rust defaults

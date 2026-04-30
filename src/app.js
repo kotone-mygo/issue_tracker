@@ -5,6 +5,8 @@ let allTags = [];
 let currentIssueId = null;
 let sortDirection = 'desc';
 let navigationStack = [];
+let previewTimeout = null;
+let currentPreviewIssue = null;
 
 const renderer = {
     code(token) {
@@ -63,10 +65,88 @@ function processIssueLinks(html) {
     return html.replace(/#(\d+)/g, (_, number) => {
         const num = parseInt(number, 10);
         const issue = issues.find(i => i.number === num);
-        return issue 
-            ? `<a href="#issue/${issue.id}" class="issue-ref" onclick="event.preventDefault(); navigateViaReference('${issue.id}');">#${number}</a>`
+        return issue
+            ? `<a href="#issue/${issue.id}" class="issue-ref" data-issue-number="${number}" aria-label="Issue #${number}: ${issue.title}" onclick="event.preventDefault(); navigateViaReference('${issue.id}');">#${number}</a>`
             : `<span class="issue-ref-unresolved">#${number}</span>`;
     });
+}
+
+function showIssuePreview(event) {
+    const issueNumber = parseInt(event.target.dataset.issueNumber, 10);
+    const issue = issues.find(i => i.number === issueNumber);
+    if (!issue) return;
+
+    if (previewTimeout) {
+        clearTimeout(previewTimeout);
+    }
+
+    currentPreviewIssue = issue;
+
+        previewTimeout = setTimeout(() => {
+            let preview = document.getElementById('issuePreview');
+            if (!preview) {
+                preview = document.createElement('div');
+                preview.id = 'issuePreview';
+                preview.className = 'issue-preview';
+                preview.setAttribute('role', 'tooltip');
+                preview.setAttribute('aria-live', 'polite');
+                document.body.appendChild(preview);
+            }
+
+            preview.innerHTML = `
+                <div class="issue-preview-title">${escapeHtml(issue.title)}</div>
+                <div class="issue-preview-meta">
+                    <span class="issue-preview-number">#${issue.number}</span>
+                    <span class="issue-status status-${issue.status.toLowerCase()}">${formatStatus(issue.status)}</span>
+                </div>
+            `;
+
+            positionPreview(event.target, preview);
+            preview.style.display = 'block';
+        }, 300);
+}
+
+function hideIssuePreview() {
+    if (previewTimeout) {
+        clearTimeout(previewTimeout);
+        previewTimeout = null;
+    }
+
+    setTimeout(() => {
+        const preview = document.getElementById('issuePreview');
+        if (preview && !preview.matches(':hover')) {
+            preview.style.display = 'none';
+            currentPreviewIssue = null;
+        }
+    }, 100);
+}
+
+function positionPreview(targetElement, previewElement) {
+    const rect = targetElement.getBoundingClientRect();
+    const previewWidth = 320;
+    const previewHeight = previewElement.offsetHeight || 100;
+    const margin = 8;
+
+    let left = rect.left + window.scrollX;
+    let top = rect.bottom + window.scrollY + margin;
+
+    if (left + previewWidth > window.innerWidth + window.scrollX) {
+        left = window.innerWidth + window.scrollX - previewWidth - margin;
+    }
+
+    if (top + previewHeight > window.innerHeight + window.scrollY) {
+        top = rect.top + window.scrollY - previewHeight - margin;
+        previewElement.classList.add('issue-preview-above');
+    } else {
+        previewElement.classList.remove('issue-preview-above');
+    }
+
+    if (left < window.scrollX + margin) {
+        left = window.scrollX + margin;
+    }
+
+    previewElement.style.left = `${left}px`;
+    previewElement.style.top = `${top}px`;
 }
 
 async function loadIssues() {
@@ -176,6 +256,14 @@ function navigateToList() {
 function navigateViaReference(targetIssueId) {
     if (currentIssueId) {
         navigationStack.push(currentIssueId);
+    }
+    const preview = document.getElementById('issuePreview');
+    if (preview) {
+        preview.style.display = 'none';
+        currentPreviewIssue = null;
+    }
+    if (previewTimeout) {
+        clearTimeout(previewTimeout);
     }
     window.location.hash = `issue/${targetIssueId}`;
 }
@@ -380,6 +468,15 @@ async function removeTag(issueId, tag) {
 function handleRouter() {
     const hash = window.location.hash.slice(1);
     
+    const preview = document.getElementById('issuePreview');
+    if (preview) {
+        preview.style.display = 'none';
+        currentPreviewIssue = null;
+    }
+    if (previewTimeout) {
+        clearTimeout(previewTimeout);
+    }
+    
     if (hash.startsWith('issue/')) {
         const issueId = hash.replace('issue/', '');
         loadIssues().then(() => showDetailView(issueId));
@@ -399,7 +496,9 @@ function formatStatus(status) {
 
 function formatDate(dateStr) {
     const date = new Date(dateStr);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+    const timeFormatter = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
+    return dateFormatter.format(date) + ' ' + timeFormatter.format(date);
 }
 
 function escapeHtml(text) {
@@ -647,5 +746,48 @@ window.handleTagInput = handleTagInput;
 window.updateIssueStatus = updateIssueStatus;
 window.showEditForm = showEditForm;
 window.cancelEdit = cancelEdit;
+
+document.addEventListener('mouseover', (event) => {
+    if (event.target.classList.contains('issue-ref')) {
+        showIssuePreview(event);
+    }
+});
+
+document.addEventListener('mouseout', (event) => {
+    if (event.target.classList.contains('issue-ref')) {
+        hideIssuePreview(event);
+    }
+});
+
+document.addEventListener('mouseover', (event) => {
+    if (event.target.closest('#issuePreview')) {
+        if (previewTimeout) {
+            clearTimeout(previewTimeout);
+        }
+    }
+});
+
+document.addEventListener('mouseout', (event) => {
+    if (event.target.closest('#issuePreview')) {
+        const preview = document.getElementById('issuePreview');
+        if (preview) {
+            preview.style.display = 'none';
+            currentPreviewIssue = null;
+        }
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        const preview = document.getElementById('issuePreview');
+        if (preview && preview.style.display === 'block') {
+            preview.style.display = 'none';
+            currentPreviewIssue = null;
+            if (previewTimeout) {
+                clearTimeout(previewTimeout);
+            }
+        }
+    }
+});
 
 handleRouter();
