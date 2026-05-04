@@ -29,9 +29,19 @@ jobs:
 
     steps:
       # Clean
-      - name: Clean old build
-        run: rm -rf dist/
-    
+      - name: Clean old build（Linux/macOS）
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        run: |
+          rm -rf dist/
+
+      - name: Clean old build（Windows）
+        if: runner.os == 'Windows'
+        run: |
+          if (Test-Path dist) {
+            Remove-Item -Recurse -Force dist
+          }
+        shell: pwsh
+
       - name: Checkout repository
         uses: actions/checkout@v6.0.2
 
