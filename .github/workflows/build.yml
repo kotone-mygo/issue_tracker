@@ -28,6 +28,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      # Clean
+      - name: Clean old build
+        run: rm -rf dist/
+    
       - name: Checkout repository
         uses: actions/checkout@v6.0.2
 
