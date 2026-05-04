@@ -21,6 +21,9 @@
     --danger: #d73a49;
     --tag-bg: rgba(255, 176, 0, 0.1);
     --tag-text: var(--amber);
+    --select-text: #e0e0e0;
+    --select-bg: #1a1a1a;
+    color-scheme: dark;
 }
 
 [data-theme="light"] {
@@ -40,7 +43,11 @@
     --danger: #d73a49;
     --tag-bg: rgba(230, 149, 0, 0.1);
     --tag-text: var(--amber);
+    --select-text: #3C3C3C;
+    --select-bg: #ffffff;
+    color-scheme: light;
 }
+
 
 body {
     font-family: 'JetBrains Mono', monospace;
@@ -288,15 +295,17 @@ header h1 {
     flex-wrap: wrap;
 }
 
-.filters select {
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-size: 0.9rem;
-    background-color: var(--bg-light);
-    color: #3C3C3C;
-    font-family: 'JetBrains Mono', monospace;
-    min-width: 140px;
+/* Native selects - hidden, no arrow */
+.filters > select,
+.edit-section > select,
+.form-group > select {
+    /* These are hidden, custom select is used instead */
+}
+
+.filters select option,
+.filters select optgroup {
+    background-color: var(--select-bg) !important;
+    color: var(--select-text) !important;
 }
 
 .filters select:focus-visible {
@@ -552,13 +561,25 @@ header h1 {
 
 .edit-section select,
 .edit-section input {
-    padding: 0.6rem 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 0.6rem 2rem 0.6rem 1rem;
     border: 1px solid var(--border);
     border-radius: 4px;
     font-size: 0.9rem;
-    background-color: var(--bg-light);
-    color: #3C3C3C;
+    background-color: var(--select-bg) !important;
+    color: var(--select-text) !important;
     font-family: 'JetBrains Mono', monospace;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 12px 12px;
+}
+
+.edit-section select option {
+    background-color: var(--select-bg) !important;
+    color: var(--select-text) !important;
 }
 
 .detail-edit-form {
@@ -582,17 +603,109 @@ header h1 {
 }
 
 .form-group input,
-.form-group textarea,
-.form-group select {
+.form-group textarea {
     width: 100%;
     padding: 0.8rem 1rem;
     border: 1px solid var(--border);
     border-radius: 4px;
     font-size: 0.9rem;
     background-color: var(--bg-light);
-    color: #3C3C3C;
+    color: var(--text);
     font-family: 'JetBrains Mono', monospace;
     transition: all 0.2s ease;
+}
+
+.form-group select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding: 0.8rem 2rem 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background-color: var(--select-bg) !important;
+    color: var(--select-text) !important;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 12px 12px;
+}
+
+.form-group select option {
+    background-color: var(--select-bg) !important;
+    color: var(--select-text) !important;
+}
+
+/* Custom Select */
+.custom-select {
+    position: relative;
+    min-width: 140px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+}
+
+.custom-select-trigger {
+    padding: 0.6rem 2rem 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--select-bg) !important;
+    color: var(--select-text) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23e0e0e0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 12px 12px;
+    user-select: none;
+}
+
+[data-theme="light"] .custom-select-trigger {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%233C3C3C' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.custom-select.open .custom-select-trigger {
+    border-color: var(--amber);
+    box-shadow: 0 0 10px rgba(255, 176, 0, 0.2);
+}
+
+.custom-select-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.25rem;
+    background-color: var(--select-bg) !important;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    overflow: hidden;
+}
+
+.custom-select.open .custom-select-options {
+    display: block;
+}
+
+.custom-select-option {
+    padding: 0.6rem 1rem;
+    color: var(--select-text) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: var(--select-bg) !important;
+}
+
+.custom-select-option:hover {
+    background-color: var(--card-bg) !important;
+    color: var(--amber) !important;
+}
+
+.custom-select-option.selected {
+    background-color: rgba(255, 176, 0, 0.1) !important;
+    color: var(--amber) !important;
 }
 
 .form-group input:focus-visible,

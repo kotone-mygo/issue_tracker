@@ -26,7 +26,8 @@ A lightweight, offline-first desktop application for issue tracking. Built with 
 - **Multi-level navigation** — "Previous Issue" button appears when navigating via references
 - **Import & Export** — backup and restore your data in JSON format
 - **Markdown support** — write descriptions with code highlighting via marked.js and highlight.js
-- **Theme toggle** — switch between dark and light themes
+- **Theme toggle** — switch between dark (amber terminal) and light themes
+- **Custom UI components** — cross-platform consistent dropdowns without OS rendering issues
 
 ## Quick Start
 
@@ -102,6 +103,10 @@ Link related issues using `#` followed by the issue number:
 3. Choose your JSON file
 4. Pick **Merge** (add to existing) or **Overwrite** (replace all)
 
+### Theme toggle
+
+Click the **☀/☾** button in the header to switch between dark and light themes. Your preference is saved locally.
+
 ## Development
 
 ### Production build
@@ -126,6 +131,7 @@ npm run tauri build -- --target x86_64-pc-windows-gnu
 | Frontend | Vanilla HTML + CSS + JavaScript |
 | Text rendering | [marked.js](https://marked.js.org) + [highlight.js](https://highlightjs.org) |
 | Storage | JSON via [`dirs`](https://crates.io/crates/dirs) crate |
+| Typography | JetBrains Mono |
 
 ### Project Structure
 
@@ -150,6 +156,7 @@ src-tauri/
 - **Frontend access**: `withGlobalTauri: true` in `tauri.conf.json` → use `window.__TAURI__.core`, not npm packages
 - **State management**: `commands::AppState` wraps `Mutex<AppData>` + `Storage`, initialized in `lib.rs`
 - **Frontend entry**: `frontendDist: "../src"` — no build step, vanilla HTML/CSS/JS
+- **Theme system**: CSS custom properties with `[data-theme="light"]` selector, persisted in `localStorage`
 
 ## Testing
 

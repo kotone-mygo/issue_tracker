@@ -184,6 +184,8 @@ async function loadTags() {
     try {
         allTags = await invoke('get_all_tags');
         renderTagFilters();
+        updateTagFilterOptions();
+        syncCustomSelects();
     } catch (error) {
         console.error('Failed to load tags:', error);
     }
@@ -334,6 +336,9 @@ async function showDetailView(issueId) {
 
         const descriptionHtml = await renderDescription(issue.description);
         
+        // Sync custom selects after rendering
+        setTimeout(syncCustomSelects, 0);
+        
         const content = document.getElementById('detailContent');
         content.innerHTML = `
             <h1 class="detail-title">${escapeHtml(issue.title)}</h1>
@@ -341,11 +346,19 @@ async function showDetailView(issueId) {
             
             <div class="edit-section">
                 <label>Status</label>
-                <select id="detailStatus" onchange="updateIssueStatus('${issue.id}', this.value)">
+                <select id="detailStatus" style="display:none;">
                     <option value="Open" ${issue.status === 'Open' ? 'selected' : ''}>Open</option>
                     <option value="InProgress" ${issue.status === 'InProgress' ? 'selected' : ''}>In Progress</option>
                     <option value="Closed" ${issue.status === 'Closed' ? 'selected' : ''}>Closed</option>
                 </select>
+                <div class="custom-select" data-select-id="detailStatus">
+                    <div class="custom-select-trigger">${issue.status === 'Open' ? 'Open' : issue.status === 'InProgress' ? 'In Progress' : 'Closed'}</div>
+                    <div class="custom-select-options">
+                        <div class="custom-select-option ${issue.status === 'Open' ? 'selected' : ''}" data-value="Open" onclick="document.getElementById('detailStatus').value='Open'; this.parentElement.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); this.closest('.custom-select').querySelector('.custom-select-trigger').textContent='Open'; updateIssueStatus('${issue.id}', 'Open')">Open</div>
+                        <div class="custom-select-option ${issue.status === 'InProgress' ? 'selected' : ''}" data-value="InProgress" onclick="document.getElementById('detailStatus').value='InProgress'; this.parentElement.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); this.closest('.custom-select').querySelector('.custom-select-trigger').textContent='In Progress'; updateIssueStatus('${issue.id}', 'InProgress')">In Progress</div>
+                        <div class="custom-select-option ${issue.status === 'Closed' ? 'selected' : ''}" data-value="Closed" onclick="document.getElementById('detailStatus').value='Closed'; this.parentElement.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); this.closest('.custom-select').querySelector('.custom-select-trigger').textContent='Closed'; updateIssueStatus('${issue.id}', 'Closed')">Closed</div>
+                    </div>
+                </div>
             </div>
 
             <div class="detail-section">
@@ -396,11 +409,19 @@ function showEditForm() {
             </div>
             <div class="form-group">
                 <label for="editStatus">Status</label>
-                <select id="editStatus">
+                <select id="editStatus" style="display:none;">
                     <option value="Open" ${issue.status === 'Open' ? 'selected' : ''}>Open</option>
                     <option value="InProgress" ${issue.status === 'InProgress' ? 'selected' : ''}>In Progress</option>
                     <option value="Closed" ${issue.status === 'Closed' ? 'selected' : ''}>Closed</option>
                 </select>
+                <div class="custom-select" data-select-id="editStatus">
+                    <div class="custom-select-trigger">${issue.status === 'Open' ? 'Open' : issue.status === 'InProgress' ? 'In Progress' : 'Closed'}</div>
+                    <div class="custom-select-options">
+                        <div class="custom-select-option ${issue.status === 'Open' ? 'selected' : ''}" data-value="Open" onclick="document.getElementById('editStatus').value='Open'; this.parentElement.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); this.closest('.custom-select').querySelector('.custom-select-trigger').textContent='Open';">Open</div>
+                        <div class="custom-select-option ${issue.status === 'InProgress' ? 'selected' : ''}" data-value="InProgress" onclick="document.getElementById('editStatus').value='InProgress'; this.parentElement.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); this.closest('.custom-select').querySelector('.custom-select-trigger').textContent='In Progress';">In Progress</div>
+                        <div class="custom-select-option ${issue.status === 'Closed' ? 'selected' : ''}" data-value="Closed" onclick="document.getElementById('editStatus').value='Closed'; this.parentElement.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected'); this.closest('.custom-select').querySelector('.custom-select-trigger').textContent='Closed';">Closed</div>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label for="editTags">Tags (comma separated)</label>
@@ -413,6 +434,8 @@ function showEditForm() {
         </form>
     `;
 
+    // Sync custom selects after rendering
+    setTimeout(syncCustomSelects, 0);
     document.getElementById('detailEditForm').addEventListener('submit', saveDetailEdit);
 }
 
@@ -533,8 +556,16 @@ function openModal() {
     document.getElementById('issueModal').classList.add('show');
     document.getElementById('modalTitle').textContent = 'New Issue';
     document.getElementById('issueForm').reset();
-    document.getElementById('issueId').value = '';
     document.getElementById('status').value = 'Open';
+    // Sync custom select for status
+    const statusSelect = document.querySelector('[data-select-id="status"]');
+    if (statusSelect) {
+        const trigger = statusSelect.querySelector('.custom-select-trigger');
+        if (trigger) trigger.textContent = 'Open';
+        statusSelect.querySelectorAll('.custom-select-option').forEach(opt => {
+            opt.classList.toggle('selected', opt.dataset.value === 'Open');
+        });
+    }
 }
 
 function closeModal() {
@@ -717,6 +748,116 @@ document.getElementById('cancelImport').addEventListener('click', function() {
 document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
 
 initTheme();
+
+// Custom select handling
+document.addEventListener('click', function(e) {
+    // Close all custom selects when clicking outside
+    if (!e.target.closest('.custom-select')) {
+        document.querySelectorAll('.custom-select.open').forEach(select => {
+            select.classList.remove('open');
+        });
+    }
+});
+
+document.addEventListener('click', function(e) {
+    const trigger = e.target.closest('.custom-select-trigger');
+    if (trigger) {
+        const select = trigger.closest('.custom-select');
+        const isOpen = select.classList.contains('open');
+        
+        // Close all other selects
+        document.querySelectorAll('.custom-select.open').forEach(s => {
+            if (s !== select) s.classList.remove('open');
+        });
+        
+        select.classList.toggle('open', !isOpen);
+        return;
+    }
+    
+    const option = e.target.closest('.custom-select-option');
+    if (option) {
+        const select = option.closest('.custom-select');
+        const selectId = select.dataset.selectId;
+        const value = option.dataset.value;
+        const trigger = select.querySelector('.custom-select-trigger');
+        
+        // Update trigger text
+        trigger.textContent = option.textContent;
+        
+        // Update selected state
+        select.querySelectorAll('.custom-select-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        option.classList.add('selected');
+        
+        // Sync the original hidden select
+        const origSelect = document.getElementById(selectId);
+        if (origSelect) {
+            origSelect.value = value;
+        }
+        
+        // Close dropdown
+        select.classList.remove('open');
+        
+        // Trigger change event for the corresponding original select if needed
+        if (selectId === 'statusFilter') {
+            document.getElementById('statusFilter').value = value;
+            renderIssues();
+        } else if (selectId === 'tagFilter') {
+            document.getElementById('tagFilter').value = value;
+            renderIssues();
+        } else if (selectId === 'sortByFilter') {
+            document.getElementById('sortByFilter').value = value;
+            renderIssues();
+        } else if (selectId === 'detailStatus') {
+            // Original select is updated via onclick in option
+            updateIssueStatus(currentIssueId, value);
+        } else if (selectId === 'editStatus') {
+            // Original select is updated via custom select handler
+        }
+    }
+});
+
+// Sync custom selects with original selects
+function syncCustomSelects() {
+    document.querySelectorAll('.custom-select').forEach(select => {
+        const selectId = select.dataset.selectId;
+        const originalSelect = document.getElementById(selectId);
+        if (originalSelect) {
+            const trigger = select.querySelector('.custom-select-trigger');
+            const selectedOption = originalSelect.options[originalSelect.selectedIndex];
+            if (selectedOption && trigger) {
+                trigger.textContent = selectedOption.text;
+                // Update selected state in custom options
+                const value = selectedOption.value;
+                select.querySelectorAll('.custom-select-option').forEach(opt => {
+                    opt.classList.toggle('selected', opt.dataset.value === value);
+                });
+            }
+        }
+    });
+}
+
+// Update custom tag filter when tags are loaded
+function updateTagFilterOptions() {
+    const tagFilter = document.getElementById('tagFilter');
+    const customSelect = document.querySelector('[data-select-id="tagFilter"]');
+    if (!customSelect) return;
+    
+    const optionsContainer = customSelect.querySelector('.custom-select-options');
+    const trigger = customSelect.querySelector('.custom-select-trigger');
+    
+    // Keep "All Tags" option
+    optionsContainer.innerHTML = '<div class="custom-select-option selected" data-value="">All Tags</div>';
+    
+    allTags.forEach(tag => {
+        const option = document.createElement('div');
+        option.className = 'custom-select-option';
+        option.dataset.value = tag;
+        option.textContent = tag;
+        optionsContainer.appendChild(option);
+    });
+}
 
 window.addEventListener('click', (event) => {
     // 只關閉 Import 和 Delete modal，不關閉 New Issue modal

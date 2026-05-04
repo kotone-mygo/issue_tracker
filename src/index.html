@@ -39,19 +39,41 @@
 
             <div class="filters">
                 <div class="filters-left">
-                    <select id="statusFilter">
+                    <select id="statusFilter" style="display:none;">
                         <option value="">All Status</option>
                         <option value="Open">Open</option>
                         <option value="InProgress">In Progress</option>
                         <option value="Closed">Closed</option>
                     </select>
-                    <select id="tagFilter">
+                    <div class="custom-select" data-select-id="statusFilter">
+                        <div class="custom-select-trigger">All Status</div>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option selected" data-value="">All Status</div>
+                            <div class="custom-select-option" data-value="Open">Open</div>
+                            <div class="custom-select-option" data-value="InProgress">In Progress</div>
+                            <div class="custom-select-option" data-value="Closed">Closed</div>
+                        </div>
+                    </div>
+                    <select id="tagFilter" style="display:none;">
                         <option value="">All Tags</option>
                     </select>
-                    <select id="sortByFilter">
+                    <div class="custom-select" data-select-id="tagFilter">
+                        <div class="custom-select-trigger">All Tags</div>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option selected" data-value="">All Tags</div>
+                        </div>
+                    </div>
+                    <select id="sortByFilter" style="display:none;">
                         <option value="created">Sort By: Created</option>
                         <option value="updated">Sort By: Updated</option>
                     </select>
+                    <div class="custom-select" data-select-id="sortByFilter">
+                        <div class="custom-select-trigger">Sort By: Created</div>
+                        <div class="custom-select-options">
+                            <div class="custom-select-option selected" data-value="created">Sort By: Created</div>
+                            <div class="custom-select-option" data-value="updated">Sort By: Updated</div>
+                        </div>
+                    </div>
                 </div>
                 <button id="directionBtn" class="direction-btn">
                     <span id="directionIcon">↓</span>
@@ -94,6 +116,7 @@
                     <label for="description">Description</label>
                     <textarea id="description" rows="4"></textarea>
                 </div>
+                <input type="hidden" id="status" value="Open">
                 <div class="form-group">
                     <label for="tags">Tags (comma separated)</label>
                     <input type="text" id="tags" placeholder="bug, feature, urgent">
