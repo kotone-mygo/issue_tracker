@@ -1,5 +1,26 @@
 const { invoke } = window.__TAURI__.core;
 
+function initTheme() {
+    const savedTheme = localStorage.getItem('issue-tracker-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('issue-tracker-theme', newTheme);
+    updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) {
+        btn.textContent = theme === 'light' ? '☀' : '☾';
+    }
+}
+
 let issues = [];
 let allTags = [];
 let currentIssueId = null;
@@ -692,6 +713,10 @@ document.getElementById('importOverwrite').addEventListener('click', function() 
 document.getElementById('cancelImport').addEventListener('click', function() {
     document.getElementById('importModal').classList.remove('show');
 });
+
+document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+
+initTheme();
 
 window.addEventListener('click', (event) => {
     // 只關閉 Import 和 Delete modal，不關閉 New Issue modal

@@ -5,10 +5,10 @@
 npm install && npm run tauri dev    # dev with hot reload
 npm run tauri build                 # production build
 
-cd src-tauri && cargo test          # all tests (must run from src-tauri/)
-cargo test --test models_tests      # specific test file
-cargo test --test commands_tests
-cargo test --test storage_tests
+cd src-tauri && cargo test                # all tests
+cd src-tauri && cargo test --test models_tests
+cd src-tauri && cargo test --test commands_tests
+cd src-tauri && cargo test --test storage_tests
 ```
 
 ## Key Quirks
