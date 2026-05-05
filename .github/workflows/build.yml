@@ -32,14 +32,14 @@ jobs:
       - name: Clean old build（Linux/macOS）
         if: runner.os == 'Linux' || runner.os == 'macOS'
         run: |
-          rm -rf dist/
+          echo "Listing contents of src-tauri/target/release/bundle/"
+          rm -f src-tauri/target/release/bundle/*.*
 
       - name: Clean old build（Windows）
         if: runner.os == 'Windows'
         run: |
-          if (Test-Path dist) {
-            Remove-Item -Recurse -Force dist
-          }
+          echo "Listing contents of src-tauri/target/release/bundle/"
+          Remove-Item -Force src-tauri/target/release/bundle/*.*
         shell: pwsh
 
       - name: Checkout repository
