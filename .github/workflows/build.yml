@@ -31,20 +31,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6.0.2
 
-      # Clean
-      - name: Clean old build（Linux/macOS）
-        if: runner.os == 'Linux' || runner.os == 'macOS'
-        run: |
-          echo "Listing contents of src-tauri/target/release/bundle/"
-          rm -f src-tauri/target/release/bundle/*.*
-
-      - name: Clean old build（Windows）
-        if: runner.os == 'Windows'
-        run: |
-          echo "Listing contents of src-tauri/target/release/bundle/"
-          Remove-Item -Force src-tauri/target/release/bundle/*.*
-        shell: pwsh
-
       # 安装系统依赖（仅 Linux）
       - name: Install Linux dependencies
         if: matrix.os == 'ubuntu-latest'
@@ -65,7 +51,6 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            src-tauri/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
