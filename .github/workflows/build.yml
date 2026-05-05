@@ -28,6 +28,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.2
+
       # Clean
       - name: Clean old build（Linux/macOS）
         if: runner.os == 'Linux' || runner.os == 'macOS'
@@ -41,9 +44,6 @@ jobs:
           echo "Listing contents of src-tauri/target/release/bundle/"
           Remove-Item -Force src-tauri/target/release/bundle/*.*
         shell: pwsh
-
-      - name: Checkout repository
-        uses: actions/checkout@v6.0.2
 
       # 安装系统依赖（仅 Linux）
       - name: Install Linux dependencies
