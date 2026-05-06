@@ -356,7 +356,6 @@ header h1 {
     border-color: var(--amber);
     background-color: var(--card-bg-hover);
     box-shadow: 0 0 20px rgba(255, 176, 0, 0.1);
-    transform: translateX(4px);
 }
 
 .issue-card:hover::before {
