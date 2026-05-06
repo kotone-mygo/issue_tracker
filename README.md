@@ -186,3 +186,10 @@ Your data is stored locally in JSON format:
 | Linux | `~/.local/share/issue-tracker/issues.json` |
 | macOS | `~/Library/Application Support/com.issue-tracker/issues.json` |
 | Windows | `%LOCALAPPDATA%\issue-tracker\issues.json` |
+
+## Resources
+
+- [Tauri 2.x Documentation](https://tauri.app)
+- [Rust Programming Language](https://www.rust-lang.org)
+- [marked.js](https://marked.js.org) - Markdown rendering
+- [highlight.js](https://highlightjs.org) - Code syntax highlighting
